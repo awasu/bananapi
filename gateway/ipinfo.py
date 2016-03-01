@@ -37,8 +37,9 @@ ipinfo = requests.get( "http://ipinfo.io" ).json()
 
 # generate the feed
 summary = ipinfo["ip"] \
-          + ": " + ", ".join( ipinfo[k] for k in ("city","region","country") if ipinfo[k] ) \
-          + " ({})".format( ipinfo["org"] )
+          + ": " + ", ".join( ipinfo[k] for k in ("city","region","country") if ipinfo[k] )
+if ipinfo.has_key( "org" ) :
+    summary = summary + " ({})".format( ipinfo["org"] )
 print "<feed xmlns='http://www.w3.org/2005/Atom' xmlns:xhtml='http://www.w3.org/1999/xhtml'>"
 print "<link href='http://ipinfo.io' />"
 print "<title> IP Info </title>"
