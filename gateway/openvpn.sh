@@ -30,14 +30,40 @@
 # ---------------------------------------------------------------------
 
 # initialize
+CONF_FILENAME=~/.openvpnrc
+DEFAULT_GATEWAY=`cat $CONF_FILENAME 2>/dev/null | sed -n -e "s/^default:\s*//p"`
+
+# initialize
 if [ "$#" -eq 0 ] ; then
-    GATEWAY="AU Melbourne" # nb: default gateway
+    GATEWAY=$DEFAULT_GATEWAY
 elif [ "$#" -eq 1 ] ; then
     GATEWAY=$1
 else
     echo "Usage: $0 [gateway]"
     echo
-    echo "    Start OpenVPN."
+    echo "    Start OpenVPN (default gateway: $DEFAULT_GATEWAY)."
+    exit 1
+fi
+
+# translate abbreviated gateway names
+case `echo $GATEWAY | tr "[:upper:]" "[:lower:]"` in
+    mel)
+        GATEWAY="AU Melbourne" ;;
+    syd)
+        GATEWAY="AU Sydney" ;;
+    nz)
+        GATEWAY="New Zealand" ;;
+    hk)
+        GATEWAY="Hong Kong" ;;
+    sg|sing)
+        GATEWAY=Singapore ;;
+    jp|jap|japan|tokyo)
+        GATEWAY=Japan ;;
+esac
+
+# validate the gateway
+if [ ! -f "/etc/openvpn/$GATEWAY.ovpn" ] ; then
+    echo "ERROR: Invalid gateway: $GATEWAY"
     exit 1
 fi
 
@@ -55,3 +81,4 @@ openvpn \
     --auth-user-pass auth --auth-nocache \
     --log /var/log/openvpn \
     --daemon
+echo "default: $GATEWAY" >$CONF_FILENAME
